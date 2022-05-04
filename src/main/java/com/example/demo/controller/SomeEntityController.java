@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dao.SomeEntity;
 import com.example.demo.dao.SomeLink;
-import com.example.demo.projection.EntityWithOneLevelRelationship;
+import com.example.demo.projection.EntityWithOneLevelRelationshipProjection;
 import com.example.demo.repository.SomeEntityRepository;
 
 @RestController
@@ -71,6 +71,7 @@ public class SomeEntityController {
         n2.setRelationships(Map.of("has_relationship_with", Arrays.asList(r2)));
 
         // Save entity
+        // (n1)-[r1]->(n2)-[r2]->(n3)
         someEntityRepository.save(n1);
 
         return n1;
@@ -78,9 +79,11 @@ public class SomeEntityController {
 
     @PostMapping("modifyExample")
     SomeEntity modify(@RequestParam("id") Long id){
+        // Get (n1)-[r1]->(n2). To simplify the code, we don't make verification here
         SomeEntity n1 = someEntityRepository.findByIdWithLevelOneLinks(id).get();
+        // Modify n1 and save as the projection, in the database, we've got r2 detached.
         n1.setName("newN1");
-        neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationship.class);
+        neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationshipProjection.class);
         return n1;
     }
 

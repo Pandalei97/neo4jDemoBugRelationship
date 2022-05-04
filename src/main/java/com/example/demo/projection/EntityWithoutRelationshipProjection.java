@@ -7,5 +7,5 @@ public interface EntityWithoutRelationshipProjection {
 
     String getName();
 
-    Map<String, Object> getAdditionalProperties();
+    Map<String, String> getAdditionalProperties();
 }
