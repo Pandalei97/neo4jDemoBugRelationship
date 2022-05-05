@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dao.SomeEntity;
-import com.example.demo.dao.SomeLink;
+import com.example.demo.entity.SomeEntity;
+import com.example.demo.entity.SomeLink;
 import com.example.demo.projection.EntityWithOneLevelRelationshipProjection;
 import com.example.demo.repository.SomeEntityRepository;
 
