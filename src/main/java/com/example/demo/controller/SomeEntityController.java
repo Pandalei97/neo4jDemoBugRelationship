@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.SomeEntity;
 import com.example.demo.entity.SomeLink;
+import com.example.demo.entity.SomeOtherEntity;
 import com.example.demo.projection.EntityWithOneLevelRelationshipProjection;
+import com.example.demo.projection.EntityWithOnlyOtherRelationshipProjection;
 import com.example.demo.repository.SomeEntityRepository;
 
 @RestController
@@ -84,6 +86,61 @@ public class SomeEntityController {
         // Modify n1 and save as the projection, in the database, we've got r2 detached.
         n1.setName("newN1");
         neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationshipProjection.class);
+        return n1;
+    }
+
+    @PostMapping("createAnotherExample")
+    SomeEntity createAnotherExample(){
+        SomeOtherEntity n1 = new SomeOtherEntity();
+        SomeOtherEntity n2 = new SomeOtherEntity();
+        SomeOtherEntity n3 = new SomeOtherEntity();
+
+        SomeLink r1 = new SomeLink();
+
+        SomeEntity m1 = new SomeEntity();
+
+        // Init Nodes
+        n1.setName("N1");
+        n1.setAdditionalProperties(Map.of(
+                "attr1", "value1",
+                "attr2", "value2"
+        ));
+
+        n2.setName("N2");
+        n2.setAdditionalProperties(Map.of(
+                "attr1", "value1",
+                "attr2", "value2"
+        ));
+        n2.setOtherRelationships(Map.of("has_other_relationship_with", Arrays.asList(n3)));
+
+        n3.setName("N3");
+        n3.setAdditionalProperties(Map.of(
+                "attr1", "value1",
+                "attr2", "value2"
+        ));
+
+        // Init a SomeEntity
+        m1.setName("M1");
+        m1.setAdditionalProperties(Map.of(
+                "attr1", "value1",
+                "attr2", "value2"
+        ));
+
+        // Init relationships
+        n1.setOtherRelationships(Map.of("has_other_relationship_with", Arrays.asList(n2)));
+
+        r1.setAdditionalProperties(Map.of(
+                "attr1", "value1",
+                "attr2", "value2"
+        ));
+        r1.setTarget(n2);
+        n1.setRelationships(Map.of("has_relationship_with", Arrays.asList(r1)));
+
+
+
+        // Save (n1)->(n2)->(n3) without m1 and r1
+        neo4jTemplate.saveAs(n1, EntityWithOnlyOtherRelationshipProjection.class);
+
         return n1;
     }
 
