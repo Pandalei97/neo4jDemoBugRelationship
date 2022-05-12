@@ -2,7 +2,7 @@ package com.example.demo.projection;
 
 import java.util.Map;
 
-public interface EntityWithoutRelationshipProjection {
+public interface EntityWithoutRel1Projection {
     Long getId();
 
     String getName();

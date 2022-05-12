@@ -9,10 +9,13 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 import lombok.Data;
 
 @Data
-@Node("SomeOtherEntity")
-public class SomeOtherEntity extends SomeEntity {
+@Node("SomeExtendedEntity")
+public class SomeExtendedEntity extends SomeEntity {
 
     @Relationship
-    protected Map<String, List<SomeOtherEntity>> otherRelationships;
+    protected Map<String, List<SomeExtendedEntity>> rel2;
+
+    @Relationship
+    protected Map<String, SomeEntity> rel3;
 
 }

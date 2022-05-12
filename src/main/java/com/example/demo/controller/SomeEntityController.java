@@ -10,11 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.entity.RootNode;
+import com.example.demo.entity.SinglePropertyNode;
 import com.example.demo.entity.SomeEntity;
+import com.example.demo.entity.SomeExtendedEntity;
 import com.example.demo.entity.SomeLink;
-import com.example.demo.entity.SomeOtherEntity;
-import com.example.demo.projection.EntityWithOneLevelRelationshipProjection;
-import com.example.demo.projection.EntityWithOnlyOtherRelationshipProjection;
+import com.example.demo.projection.EntityWithOneLevelRel1Projection;
+import com.example.demo.projection.ExtendedEntityWithOnlyRel2Projection;
+import com.example.demo.projection.ExtendedEntityWithRel2AndOneLevelRel1Projection;
+import com.example.demo.repository.RootNodeRepository;
 import com.example.demo.repository.SomeEntityRepository;
 
 @RestController
@@ -69,8 +73,8 @@ public class SomeEntityController {
         r2.setTarget(n3);
 
         // Add relationships
-        n1.setRelationships(Map.of("has_relationship_with", Arrays.asList(r1)));
-        n2.setRelationships(Map.of("has_relationship_with", Arrays.asList(r2)));
+        n1.setRel1(Map.of("has_rel1_with", Arrays.asList(r1)));
+        n2.setRel1(Map.of("has_rel1_with", Arrays.asList(r2)));
 
         // Save entity
         // (n1)-[r1]->(n2)-[r2]->(n3)
@@ -85,15 +89,15 @@ public class SomeEntityController {
         SomeEntity n1 = someEntityRepository.findByIdWithLevelOneLinks(id).get();
         // Modify n1 and save as the projection, in the database, we've got r2 detached.
         n1.setName("newN1");
-        neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationshipProjection.class);
+        neo4jTemplate.saveAs(n1, EntityWithOneLevelRel1Projection.class);
         return n1;
     }
 
     @PostMapping("createAnotherExample")
     SomeEntity createAnotherExample(){
-        SomeOtherEntity n1 = new SomeOtherEntity();
-        SomeOtherEntity n2 = new SomeOtherEntity();
-        SomeOtherEntity n3 = new SomeOtherEntity();
+        SomeExtendedEntity n1 = new SomeExtendedEntity();
+        SomeExtendedEntity n2 = new SomeExtendedEntity();
+        SomeExtendedEntity n3 = new SomeExtendedEntity();
 
         SomeLink r1 = new SomeLink();
 
@@ -111,7 +115,7 @@ public class SomeEntityController {
                 "attr1", "value1",
                 "attr2", "value2"
         ));
-        n2.setOtherRelationships(Map.of("has_other_relationship_with", Arrays.asList(n3)));
+        n2.setRel2(Map.of("has_rel2_with", Arrays.asList(n3)));
 
         n3.setName("N3");
         n3.setAdditionalProperties(Map.of(
@@ -127,88 +131,21 @@ public class SomeEntityController {
         ));
 
         // Init relationships
-        n1.setOtherRelationships(Map.of("has_other_relationship_with", Arrays.asList(n2)));
+        n1.setRel2(Map.of("has_rel2_with", Arrays.asList(n2)));
 
         r1.setAdditionalProperties(Map.of(
                 "attr1", "value1",
                 "attr2", "value2"
         ));
         r1.setTarget(n2);
-        n1.setRelationships(Map.of("has_relationship_with", Arrays.asList(r1)));
+        n1.setRel1(Map.of("has_rel1_with", Arrays.asList(r1)));
 
 
 
         // Save (n1)->(n2)->(n3) without m1 and r1
-        neo4jTemplate.saveAs(n1, EntityWithOnlyOtherRelationshipProjection.class);
+        neo4jTemplate.saveAs(n1, ExtendedEntityWithOnlyRel2Projection.class);
 
         return n1;
     }
-
-    @PostMapping("createNodeWithoutProperties1")
-    SomeEntity createExampleWithoutProperties1(){
-
-        /*
-               (n1) -> (n2) -> (n3)
-                            -> (m1)
-
-         */
-        // Create n1, n2, n3
-        SomeOtherEntity n1 = new SomeOtherEntity();
-        SomeOtherEntity n2 = new SomeOtherEntity();
-        SomeOtherEntity n3 = new SomeOtherEntity();
-
-        SomeLink r1 = new SomeLink();
-        SomeEntity m1 = new SomeEntity();
-        r1.setTarget(m1);
-
-        // (n1) -> (n2)
-        n1.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n2)));
-
-        // (n2) -> (n3)
-        //      -> (m1)
-        n2.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n3)));
-        n2.setRelationships(Map.of("has_other_rel_with", Arrays.asList(r1)));
-
-        neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationshipProjection.class);
-        // When we don't use the projection, the nodes are persisted correctly
-        // someEntityRepository.save(n1);
-        return n1;
-
-    }
-
-    @PostMapping("createNodeWithoutProperties2")
-    SomeEntity createExampleWithoutProperties2(){
-
-        /*
-               (n1) -> (n2) -> (n3)
-                    -> (m1)
-
-         */
-        // Create n1, n2, n3
-        SomeOtherEntity n1 = new SomeOtherEntity();
-        SomeOtherEntity n2 = new SomeOtherEntity();
-        SomeOtherEntity n3 = new SomeOtherEntity();
-
-        // Create links
-        SomeLink r1 = new SomeLink();
-        SomeEntity m1 = new SomeEntity();
-        r1.setTarget(m1);
-
-        // (n1) -> (n2)
-        //      -> (m1)
-        n1.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n2)));
-        n1.setRelationships(Map.of("has_other_rel_with", Arrays.asList(r1)));
-
-        // (n2) -> (n3)
-        n2.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n3)));
-
-
-        neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationshipProjection.class);
-        // When we don't use the projection, the nodes are persisted correctly
-        // someEntityRepository.save(n1);
-        return n1;
-
-    }
-
 
 }
