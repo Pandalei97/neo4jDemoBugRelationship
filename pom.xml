@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-neo4j</artifactId>
-			<version>6.2.5-GH-2533-SNAPSHOT</version>
+			<version>6.2.5-GH2533-2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

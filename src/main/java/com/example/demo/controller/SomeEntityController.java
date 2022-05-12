@@ -144,5 +144,71 @@ public class SomeEntityController {
         return n1;
     }
 
+    @PostMapping("createNodeWithoutProperties1")
+    SomeEntity createExampleWithoutProperties1(){
+
+        /*
+               (n1) -> (n2) -> (n3)
+                            -> (m1)
+
+         */
+        // Create n1, n2, n3
+        SomeOtherEntity n1 = new SomeOtherEntity();
+        SomeOtherEntity n2 = new SomeOtherEntity();
+        SomeOtherEntity n3 = new SomeOtherEntity();
+
+        SomeLink r1 = new SomeLink();
+        SomeEntity m1 = new SomeEntity();
+        r1.setTarget(m1);
+
+        // (n1) -> (n2)
+        n1.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n2)));
+
+        // (n2) -> (n3)
+        //      -> (m1)
+        n2.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n3)));
+        n2.setRelationships(Map.of("has_other_rel_with", Arrays.asList(r1)));
+
+        neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationshipProjection.class);
+        // When we don't use the projection, the nodes are persisted correctly
+        // someEntityRepository.save(n1);
+        return n1;
+
+    }
+
+    @PostMapping("createNodeWithoutProperties2")
+    SomeEntity createExampleWithoutProperties2(){
+
+        /*
+               (n1) -> (n2) -> (n3)
+                    -> (m1)
+
+         */
+        // Create n1, n2, n3
+        SomeOtherEntity n1 = new SomeOtherEntity();
+        SomeOtherEntity n2 = new SomeOtherEntity();
+        SomeOtherEntity n3 = new SomeOtherEntity();
+
+        // Create links
+        SomeLink r1 = new SomeLink();
+        SomeEntity m1 = new SomeEntity();
+        r1.setTarget(m1);
+
+        // (n1) -> (n2)
+        //      -> (m1)
+        n1.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n2)));
+        n1.setRelationships(Map.of("has_other_rel_with", Arrays.asList(r1)));
+
+        // (n2) -> (n3)
+        n2.setOtherRelationships(Map.of("has_other_rel_with", Arrays.asList(n3)));
+
+
+        neo4jTemplate.saveAs(n1, EntityWithOneLevelRelationshipProjection.class);
+        // When we don't use the projection, the nodes are persisted correctly
+        // someEntityRepository.save(n1);
+        return n1;
+
+    }
+
 
 }
